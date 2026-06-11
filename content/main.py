@@ -2,6 +2,8 @@
 from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
 from .pricing import PRICING
 
+_NAVER_VERIFY = '<meta name="naver-site-verification" content="bee3e7b61079711548606bcd85ec87cf48068e9b" />\n'
+
 _JSONLD = f"""<script type="application/ld+json">
 {{
   "@context": "https://schema.org",
@@ -217,7 +219,7 @@ PAGE = {
     "desc": "동작 출장마사지·홈타이 안내 페이지입니다. 노량진동, 상도동, 흑석동, 사당동, 신대방동과 동작구 주요 지하철역 인근, 테마별 관리, 예약 전 확인사항을 확인해보세요.",
     "h1": "동작 출장마사지·홈타이 예약 안내",
     "body": _BODY,
-    "extra_head": _JSONLD,
+    "extra_head": _NAVER_VERIFY + _JSONLD,
     "breadcrumb": [],
     "hero": _HERO,
 }
