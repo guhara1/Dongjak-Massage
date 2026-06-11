@@ -1,0 +1,118 @@
+:root {
+  --primary: #2b6e4f;
+  --primary-dark: #1e5039;
+  --accent: #d4a843;
+  --bg: #fbfaf7;
+  --text: #2a2a28;
+  --muted: #6b6b66;
+  --line: #e6e2d8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 1rem; }
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* header */
+.site-header { background: #fff; border-bottom: 1px solid var(--line); }
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1rem;
+}
+.brand { font-size: 1.25rem; font-weight: 800; color: var(--primary-dark); }
+.brand:hover { text-decoration: none; }
+.brand-sub { font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-left: 0.3rem; }
+.call-btn {
+  background: var(--primary); color: #fff; font-weight: 700;
+  padding: 0.5rem 1rem; border-radius: 2rem; white-space: nowrap;
+}
+.call-btn:hover { background: var(--primary-dark); text-decoration: none; }
+
+/* gnb */
+.gnb { background: var(--primary-dark); }
+.gnb ul { list-style: none; display: flex; flex-wrap: wrap; }
+.gnb > .wrap > ul > li { position: relative; }
+.gnb > .wrap > ul > li > a {
+  display: block; color: #fff; padding: 0.6rem 0.75rem;
+  font-size: 0.92rem; font-weight: 600;
+}
+.gnb > .wrap > ul > li > a:hover,
+.gnb > .wrap > ul > li > a.active { background: var(--primary); text-decoration: none; }
+.subnav {
+  display: none; position: absolute; left: 0; top: 100%; z-index: 10;
+  background: #fff; border: 1px solid var(--line); border-radius: 0 0 6px 6px;
+  min-width: 11rem; box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.has-sub:hover .subnav { display: block; }
+.subnav li a {
+  display: block; padding: 0.45rem 0.9rem; font-size: 0.88rem; color: var(--text);
+}
+.subnav li a:hover { background: var(--bg); text-decoration: none; }
+
+/* content */
+main { padding: 1.5rem 1rem 2.5rem; }
+.breadcrumb { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.2rem; }
+.breadcrumb a { color: var(--muted); }
+
+article h1 {
+  font-size: 1.65rem; line-height: 1.35; color: var(--primary-dark);
+  margin-bottom: 1.2rem; padding-bottom: 0.8rem; border-bottom: 3px solid var(--accent);
+}
+article h2 {
+  font-size: 1.25rem; color: var(--primary-dark);
+  margin: 2.2rem 0 0.8rem; padding-left: 0.7rem; border-left: 4px solid var(--accent);
+}
+article h3 { font-size: 1.05rem; margin: 1.4rem 0 0.5rem; }
+article p { margin-bottom: 1rem; }
+article ul { margin: 0 0 1rem 1.3rem; }
+article li { margin-bottom: 0.35rem; }
+
+.faq-item {
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  padding: 1rem 1.2rem; margin-bottom: 0.8rem;
+}
+.faq-q { font-size: 1rem; color: var(--primary-dark); margin: 0 0 0.4rem; }
+.faq-a { margin: 0; color: var(--text); }
+
+/* related */
+.related { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+.related h2 { font-size: 1.05rem; margin-bottom: 0.6rem; color: var(--primary-dark); }
+.related ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.related li a {
+  display: inline-block; background: #fff; border: 1px solid var(--line);
+  border-radius: 2rem; padding: 0.35rem 0.9rem; font-size: 0.88rem;
+}
+.related li a:hover { border-color: var(--primary); text-decoration: none; }
+
+/* cta */
+.cta-band {
+  margin-top: 2.5rem; background: var(--primary-dark); color: #fff;
+  border-radius: 10px; padding: 1.4rem 1.5rem; text-align: center;
+}
+.cta-band a { color: var(--accent); font-weight: 800; font-size: 1.25rem; }
+.cta-note { font-size: 0.85rem; opacity: 0.85; margin-top: 0.4rem; }
+
+/* footer */
+.site-footer {
+  background: #232520; color: #c9c9c2; font-size: 0.85rem;
+  padding: 1.6rem 0; text-align: center;
+}
+.site-footer a { color: var(--accent); }
+.footer-links { margin-top: 0.4rem; }
+.footer-note { margin-top: 0.6rem; font-size: 0.78rem; opacity: 0.75; }
+
+@media (max-width: 640px) {
+  .gnb > .wrap > ul > li > a { padding: 0.55rem 0.55rem; font-size: 0.84rem; }
+  article h1 { font-size: 1.4rem; }
+  .subnav { position: static; display: none; }
+}
