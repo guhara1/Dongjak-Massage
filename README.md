@@ -48,6 +48,6 @@ python3 build.py
 
 ## 배포 전 해야 할 일
 
-1. `content/site.py`의 `BASE_URL`을 실제 도메인으로 변경
+1. ~~BASE_URL 변경~~ → `https://dongjak-massage.pages.dev` 적용 완료
 2. `python3 build.py` 재실행 (canonical·sitemap·robots.txt에 반영됨)
 3. Google Search Console에 `sitemap.xml` 제출

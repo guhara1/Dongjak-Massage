@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.ganda-go.example.com/sitemap.xml
+Sitemap: https://dongjak-massage.pages.dev/sitemap.xml
+Sitemap: https://dongjak-massage.pages.dev/rss.xml

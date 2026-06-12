@@ -22,6 +22,21 @@ from content.site import (BASE_URL, BRAND, NAV, PHONE, PHONE_DISPLAY)
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MIN_INDEX_CHARS = 2000
 
+# 색인 가속 설정
+LASTMOD_DEFAULT = "2026-06-12"   # 페이지에 date 가 없으면 사용 (사이트 공개일)
+INDEXNOW_KEY = "8f4c2a1d6e9b4730a5d18c3f7b2e6094"  # IndexNow 키 (루트에 키 파일 생성)
+
+
+def _rfc822(date_str):
+    """YYYY-MM-DD → RFC822 (RSS pubDate, KST 09:00 고정)."""
+    import datetime
+    d = datetime.date.fromisoformat(date_str)
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    return (f"{days[d.weekday()]}, {d.day:02d} {months[d.month-1]} {d.year}"
+            " 09:00:00 +0900")
+
 
 def text_length(body_html: str) -> int:
     """태그를 제거한 본문 글자수(공백 포함, 연속 공백은 1자).
@@ -163,6 +178,7 @@ def render_page(page: dict) -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
+<link rel="alternate" type="application/rss+xml" title="{BRAND} 새 글 피드" href="{BASE_URL.rstrip('/')}/rss.xml">
 {extra_head}</head>
 <body>
 <header class="site-header">
@@ -252,7 +268,7 @@ def render_page(page: dict) -> str:
 
 def build() -> None:
     report = []
-    sitemap_urls = []
+    indexed = []  # (url, page) — 색인 허용 페이지
 
     for page in PAGES:
         path = page["path"]  # "" 또는 "dongjak-gu/sangdo-dong/" 형태
@@ -265,12 +281,16 @@ def build() -> None:
         chars = text_length(page["body"])
         noindex = page.get("noindex", False) or chars < MIN_INDEX_CHARS
         if not noindex:
-            sitemap_urls.append(BASE_URL.rstrip("/") + "/" + path)
+            indexed.append((BASE_URL.rstrip("/") + "/" + path, page))
         report.append((path or "/", chars, "noindex" if noindex else "index"))
 
-    # sitemap.xml
+    base = BASE_URL.rstrip("/")
+
+    # sitemap.xml — lastmod 포함 (크롤 우선순위 신호)
     urls = "\n".join(
-        f"  <url><loc>{u}</loc></url>" for u in sitemap_urls
+        "  <url><loc>%s</loc><lastmod>%s</lastmod></url>"
+        % (u, p.get("date", LASTMOD_DEFAULT))
+        for u, p in indexed
     )
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(
@@ -279,12 +299,48 @@ def build() -> None:
             f"{urls}\n</urlset>\n"
         )
 
-    # robots.txt
+    # rss.xml — 네이버 서치어드바이저 RSS 제출용 (매거진 글은 발행일, 나머지는 공개일)
+    def esc(s):
+        return html.escape(s, quote=False)
+    items = []
+    ordered = sorted(indexed, key=lambda t: t[1].get("date", LASTMOD_DEFAULT), reverse=True)
+    for u, p in ordered:
+        date = p.get("date", LASTMOD_DEFAULT)
+        items.append(
+            "  <item>\n"
+            f"    <title>{esc(p['title'])}</title>\n"
+            f"    <link>{u}</link>\n"
+            f"    <guid isPermaLink=\"true\">{u}</guid>\n"
+            f"    <description>{esc(p['desc'])}</description>\n"
+            f"    <pubDate>{_rfc822(date)}</pubDate>\n"
+            "  </item>"
+        )
+    with open(os.path.join(ROOT, "rss.xml"), "w", encoding="utf-8") as f:
+        f.write(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+            "<channel>\n"
+            f"  <title>{esc(BRAND)} — 동작 출장마사지·홈타이 안내</title>\n"
+            f"  <link>{base}/</link>\n"
+            "  <description>동작구 전지역 방문 관리 안내와 지역·역세권·테마 가이드, 매거진 새 글 피드입니다.</description>\n"
+            "  <language>ko</language>\n"
+            f"  <lastBuildDate>{_rfc822(ordered[0][1].get('date', LASTMOD_DEFAULT))}</lastBuildDate>\n"
+            f'  <atom:link href="{base}/rss.xml" rel="self" type="application/rss+xml"/>\n'
+            + "\n".join(items)
+            + "\n</channel>\n</rss>\n"
+        )
+
+    # robots.txt — sitemap·rss 모두 등록 (Google 은 RSS 도 sitemap 으로 수용)
     with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(
             "User-agent: *\nAllow: /\n\n"
-            f"Sitemap: {BASE_URL.rstrip('/')}/sitemap.xml\n"
+            f"Sitemap: {base}/sitemap.xml\n"
+            f"Sitemap: {base}/rss.xml\n"
         )
+
+    # IndexNow 키 파일 (Bing·Naver 등 IndexNow 참여 검색엔진 즉시 색인용)
+    with open(os.path.join(ROOT, f"{INDEXNOW_KEY}.txt"), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY)
 
     # .nojekyll (GitHub Pages)
     open(os.path.join(ROOT, ".nojekyll"), "w").close()
@@ -294,7 +350,7 @@ def build() -> None:
     for p, c, r in sorted(report):
         flag = "" if (r == "noindex" or MIN_INDEX_CHARS <= c <= 2500) else "  ⚠"
         print(f"{p.ljust(width)}  {str(c).rjust(5)}  {r}{flag}")
-    print(f"\n{len(report)} pages built, {len(sitemap_urls)} in sitemap.")
+    print(f"\n{len(report)} pages built, {len(indexed)} in sitemap/rss.")
 
 
 if __name__ == "__main__":
